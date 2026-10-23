@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../features/auth/store/authStore";
 import { logout } from "../../features/auth/api/authApi";
@@ -19,6 +19,28 @@ export default function Navbar() {
   const { data: cart } = useCart();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // 1. Create a ref for the dropdown container
+const dropdownRef = useRef<HTMLDivElement>(null);
+// 2. Listen for clicks anywhere on the document
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    // If click was outside dropdownRef element, close the dropdown
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node)
+    ) {
+      setUserDropdownOpen(false);
+    }
+  };
+  if (userDropdownOpen) {
+    document.addEventListener("mousedown", handleClickOutside);
+  }
+  // Cleanup listener when unmounted or dropdown closed
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [userDropdownOpen]);
 
   const cartItemCount = cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
 
@@ -120,8 +142,9 @@ export default function Navbar() {
           </Link>
 
           {/* User Auth Section */}
+        
           {user ? (
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                 className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white py-1.5 pl-2 pr-3 text-xs font-medium text-slate-700 hover:border-slate-300 hover:bg-slate-50 transition shadow-sm"
@@ -138,10 +161,7 @@ export default function Navbar() {
               {/* User Dropdown */}
               {userDropdownOpen && (
                 <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setUserDropdownOpen(false)}
-                  />
+                
                   <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-2xl border border-slate-200 bg-white p-2 shadow-xl shadow-slate-900/10 z-50">
                     <div className="border-b border-slate-100 px-3 py-2.5">
                       <p className="text-xs font-semibold text-slate-900 truncate">
