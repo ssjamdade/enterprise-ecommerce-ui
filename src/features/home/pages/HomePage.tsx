@@ -76,6 +76,14 @@ export default function HomePage() {
                   <ArrowRightIcon className="w-4 h-4" />
                 </Link>
 
+                <Link
+                  to="/seller/kyc"
+                  className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-xs font-bold text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 transition"
+                >
+                  <ShieldCheckIcon className="w-4 h-4 text-indigo-600" />
+                  <span>Seller Onboarding</span>
+                </Link>
+
                 {!user && (
                   <Link
                     to="/login"

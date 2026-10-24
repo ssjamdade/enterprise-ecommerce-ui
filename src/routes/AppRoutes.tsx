@@ -8,6 +8,9 @@ import CartPage from "../features/cart/pages/CartPage";
 import CheckoutPage from "../features/checkout/pages/CheckoutPage";
 import OrderConfirmationPage from "../features/orders/pages/OrderConfirmationPage";
 import OrderHistoryPage from "../features/orders/pages/OrderHistoryPage";
+import SellerKycPage from "../features/seller/pages/SellerKycPage";
+import SellerProductsPage from "../features/seller/pages/SellerProductsPage";
+import AdminKycReviewPage from "../features/seller/pages/AdminKycReviewPage";
 import ProtectedRoute from "./ProtectedRoute";
 
 export default function AppRoutes() {
@@ -44,6 +47,34 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <OrderConfirmationPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Seller Onboarding & KYC Routes */}
+        <Route
+          path="/seller/kyc"
+          element={
+            <ProtectedRoute>
+              <SellerKycPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/seller/products"
+          element={
+            <ProtectedRoute>
+              <SellerProductsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Compliance & KYC Review Routes */}
+        <Route
+          path="/admin/kyc"
+          element={
+            <ProtectedRoute>
+              <AdminKycReviewPage />
             </ProtectedRoute>
           }
         />

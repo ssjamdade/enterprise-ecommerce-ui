@@ -207,6 +207,13 @@ export default function RegisterPage() {
                 </div>
               )}
 
+              <div className="rounded-2xl border border-indigo-100 bg-indigo-50/60 p-3 text-xs text-indigo-900 flex items-start gap-2.5">
+                <ShieldCheckIcon className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                <p>
+                  <strong>Looking to sell products?</strong> Register your account here, then complete the <strong>Seller KYC Verification</strong> to activate selling privileges!
+                </p>
+              </div>
+
               {/* Submit Button */}
               <div className="pt-2">
                 <button

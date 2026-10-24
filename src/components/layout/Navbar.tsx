@@ -10,6 +10,8 @@ import {
   LogOutIcon,
   ChevronDownIcon,
   SparklesIcon,
+  ShieldCheckIcon,
+  BuildingIcon,
 } from "../common/Icons";
 
 export default function Navbar() {
@@ -111,6 +113,12 @@ useEffect(() => {
             >
               All Products
             </Link>
+            <Link
+              to="/seller/kyc"
+              className="rounded-lg px-3 py-1.5 transition text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+            >
+              Sell on Store
+            </Link>
           </nav>
         </div>
 
@@ -197,6 +205,33 @@ useEffect(() => {
                       >
                         <ShoppingBagIcon className="w-3.5 h-3.5 text-slate-400" />
                         <span>My Cart ({cartItemCount})</span>
+                      </Link>
+
+                      <div className="border-t border-slate-100 my-1"></div>
+
+                      <Link
+                        to="/seller/kyc"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                      >
+                        <ShieldCheckIcon className="w-3.5 h-3.5 text-indigo-500" />
+                        <span>Seller KYC Portal</span>
+                      </Link>
+                      <Link
+                        to="/seller/products"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                      >
+                        <BuildingIcon className="w-3.5 h-3.5 text-emerald-500" />
+                        <span>Seller Dashboard</span>
+                      </Link>
+                      <Link
+                        to="/admin/kyc"
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-amber-700 hover:bg-amber-50"
+                      >
+                        <ShieldCheckIcon className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Admin KYC Review</span>
                       </Link>
                     </div>
 
