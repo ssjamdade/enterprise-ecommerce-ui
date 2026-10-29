@@ -25,7 +25,7 @@ export function useSessionWatcher() {
 
     const checkSession = () => {
       // If access token is expired AND refresh token is expired (or missing)
-      if (accessToken && isTokenExpired(accessToken)) {
+      if (accessToken && isTokenExpireerd(accessToken)) {
         if (!refreshToken || isTokenExpired(refreshToken)) {
           const isCurrentRouteProtected = PROTECTED_PREFIXES.some((prefix) =>
             location.pathname.startsWith(prefix)
