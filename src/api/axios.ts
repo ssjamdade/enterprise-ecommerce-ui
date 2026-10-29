@@ -5,8 +5,23 @@ import axios, {
 
 import { useAuthStore } from "../features/auth/store/authStore";
 import type { AuthResponse } from "../features/auth/types/auth";
+import { isTokenExpired } from "../utils/token";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
+
+/**
+ * Global helper to handle session expiration and redirect user to login
+ */
+export function handleSessionExpired() {
+  useAuthStore.getState().clearAuth();
+
+  const currentPath = window.location.pathname;
+  if (!currentPath.startsWith("/login") && !currentPath.startsWith("/register")) {
+    const search = window.location.search;
+    const redirectUrl = encodeURIComponent(currentPath + search);
+    window.location.href = `/login?redirect=${redirectUrl}&expired=true`;
+  }
+}
 
 /**
  * Axios instance for unauthenticated endpoints.
@@ -20,7 +35,7 @@ export const publicApi = axios.create({
 /**
  * Axios instance for authenticated endpoints.
  * Automatically attaches JWT access token and transparently
- * handles 401 token refresh rotation.
+ * handles 401 token refresh rotation or redirects on expiration.
  */
 export const api = axios.create({
   baseURL,
@@ -28,11 +43,20 @@ export const api = axios.create({
 
 /**
  * Request Interceptor:
- * Automatically attaches Bearer accessToken from Zustand store to every request.
+ * Attaches Bearer accessToken from Zustand store to every request.
+ * If both access token and refresh token are expired, immediately aborts and redirects to /login.
  */
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const accessToken = useAuthStore.getState().accessToken;
+    const { accessToken, refreshToken } = useAuthStore.getState();
+
+    // If both access token and refresh token are expired, redirect to login immediately
+    if (accessToken && isTokenExpired(accessToken)) {
+      if (!refreshToken || isTokenExpired(refreshToken)) {
+        handleSessionExpired();
+        return Promise.reject(new Error("Session has expired. Redirecting to login."));
+      }
+    }
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -51,6 +75,7 @@ let refreshPromise: Promise<AuthResponse> | null = null;
 /**
  * Response Interceptor:
  * Intercepts 401 Unauthorized errors and handles automatic token refresh & request retry.
+ * If refresh fails or token is expired, clears auth and redirects to /login.
  */
 api.interceptors.response.use(
   (response) => response,
@@ -67,21 +92,21 @@ api.interceptors.response.use(
 
     // Do not attempt to refresh if the refresh endpoint itself returns 401
     if (originalRequest.url?.includes("/auth/refresh")) {
-      useAuthStore.getState().clearAuth();
+      handleSessionExpired();
       return Promise.reject(error);
     }
 
     // Prevent infinite loop if retried request fails again with 401
     if (originalRequest._retry) {
-      useAuthStore.getState().clearAuth();
+      handleSessionExpired();
       return Promise.reject(error);
     }
 
     const storedRefreshToken = useAuthStore.getState().refreshToken;
 
-    // If there is no refresh token stored, user must log in again
-    if (!storedRefreshToken) {
-      useAuthStore.getState().clearAuth();
+    // If there is no refresh token or it is expired, user must log in again
+    if (!storedRefreshToken || isTokenExpired(storedRefreshToken)) {
+      handleSessionExpired();
       return Promise.reject(error);
     }
 
@@ -97,12 +122,13 @@ api.interceptors.response.use(
           })
           .then((response) => {
             const authResponse = response.data.data;
+            const currentUser = useAuthStore.getState().user;
 
             // Save new tokens to Zustand store & localStorage
             useAuthStore.getState().setAuth(
               authResponse.accessToken,
-              authResponse.refreshToken,
-              authResponse.user
+              authResponse.refreshToken || storedRefreshToken,
+              authResponse.user || currentUser!
             );
 
             return authResponse;
@@ -122,7 +148,7 @@ api.interceptors.response.use(
       return api(originalRequest);
     } catch (refreshError) {
       // Refresh token failed or expired -> clear state and force user to log in
-      useAuthStore.getState().clearAuth();
+      handleSessionExpired();
       return Promise.reject(refreshError);
     }
   }
