@@ -13,6 +13,7 @@ import {
   EyeIcon,
   EyeSlashIcon,
   CheckIcon,
+  AlertCircleIcon,
 } from "../../../components/common/Icons";
 
 export default function LoginPage() {
@@ -21,6 +22,11 @@ export default function LoginPage() {
   const setAuth = useAuthStore((state) => state.setAuth);
   const [serverError, setServerError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const searchParams = new URLSearchParams(location.search);
+  const isSessionExpired =
+    Boolean((location.state as any)?.expired) ||
+    searchParams.get("expired") === "true";
 
   const {
     register,
@@ -46,7 +52,8 @@ export default function LoginPage() {
         response.user
       );
 
-      const from = (location.state as any)?.from?.pathname || "/";
+      const redirectParam = searchParams.get("redirect");
+      const from = redirectParam || (location.state as any)?.from?.pathname || "/";
       navigate(from, { replace: true });
     } catch (err: unknown) {
       if (err instanceof AxiosError && err.response?.data?.message) {
@@ -140,6 +147,14 @@ export default function LoginPage() {
                   )}
                 </div>
               </div>
+
+              {/* Session Expired Alert */}
+              {isSessionExpired && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-800 flex items-center gap-2">
+                  <AlertCircleIcon className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Your session has expired. Please sign in again to continue.</span>
+                </div>
+              )}
 
               {/* Server Error Alert */}
               {serverError && (

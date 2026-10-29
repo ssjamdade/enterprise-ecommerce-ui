@@ -12,10 +12,17 @@ import SellerKycPage from "../features/seller/pages/SellerKycPage";
 import SellerProductsPage from "../features/seller/pages/SellerProductsPage";
 import AdminKycReviewPage from "../features/seller/pages/AdminKycReviewPage";
 import ProtectedRoute from "./ProtectedRoute";
+import { useSessionWatcher } from "../features/auth/hooks/useSessionWatcher";
+
+function SessionMonitor() {
+  useSessionWatcher();
+  return null;
+}
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
+      <SessionMonitor />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
