@@ -72,7 +72,7 @@ export default function LoginPage() {
           {/* Brand header */}
           <div>
             <Link to="/" className="inline-flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-violet-700 text-white font-extrabold text-base shadow-sm shadow-indigo-500/20">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-indigo-600 to-violet-700 text-white font-extrabold text-base shadow-sm shadow-indigo-500/20">
                 E
               </div>
               <span className="text-lg font-black tracking-tight text-slate-900">
@@ -198,7 +198,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right Pane: Showcase Banner */}
-      <div className="relative hidden w-0 flex-1 lg:block bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 p-12 text-white">
+      <div className="relative hidden w-0 flex-1 lg:block bg-linear-to-br from-slate-900 via-indigo-950 to-slate-950 p-12 text-white">
         <div className="flex h-full flex-col justify-between">
           <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-indigo-300 uppercase">
             <SparklesIcon className="w-4 h-4 text-indigo-400" />
