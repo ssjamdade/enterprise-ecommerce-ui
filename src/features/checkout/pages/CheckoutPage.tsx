@@ -10,10 +10,7 @@ import { createPayment, verifyPayment } from "../../payment/api/paymentApi";
 import type { CreateAddressRequest, AddressType } from "../../addresses/types/address";
 import {
   ShieldCheckIcon,
-  TruckIcon,
-  CheckIcon,
   ShoppingBagIcon,
-  SparklesIcon,
   ArrowRightIcon,
 } from "../../../components/common/Icons";
 

@@ -3,14 +3,24 @@ import { z } from "zod";
 export const loginSchema = z.object({
   email: z
     .string()
-    .min(1, "Email is required")
-    .email("Please enter a valid email address"),
+    .min(1, "Email or username is required"),
   password: z
     .string()
     .min(1, "Password is required"),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
+
+export const adminLoginSchema = z.object({
+  usernameOrEmail: z
+    .string()
+    .min(1, "Admin username or email is required"),
+  password: z
+    .string()
+    .min(1, "Password is required"),
+});
+
+export type AdminLoginFormData = z.infer<typeof adminLoginSchema>;
 
 export const registerSchema = z.object({
   firstName: z

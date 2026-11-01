@@ -192,6 +192,16 @@ export default function LoginPage() {
                   </Link>
                 </p>
               </div>
+
+              <div className="pt-4 mt-2 border-t border-slate-100 text-center">
+                <Link
+                  to="/admin/login"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-600 transition"
+                >
+                  <ShieldCheckIcon className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Administrator Access Portal →</span>
+                </Link>
+              </div>
             </form>
           </div>
         </div>

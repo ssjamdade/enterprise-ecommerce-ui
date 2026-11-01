@@ -8,14 +8,13 @@ import {
   CloseIcon,
   ArrowRightIcon,
   ShieldCheckIcon,
-  TruckIcon,
 } from "../../../components/common/Icons";
 
 export default function CartPage() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
 
-  const { data: cart, isLoading, isError } = useCart();
+  const { data: cart, isLoading } = useCart();
   const updateItemMutation = useUpdateCartItem();
   const removeItemMutation = useRemoveCartItem();
   const clearCartMutation = useClearCart();

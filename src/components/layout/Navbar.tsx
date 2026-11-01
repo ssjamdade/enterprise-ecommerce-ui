@@ -225,14 +225,16 @@ useEffect(() => {
                         <BuildingIcon className="w-3.5 h-3.5 text-emerald-500" />
                         <span>Seller Dashboard</span>
                       </Link>
-                      <Link
-                        to="/admin/kyc"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-amber-700 hover:bg-amber-50"
-                      >
-                        <ShieldCheckIcon className="w-3.5 h-3.5 text-amber-600" />
-                        <span>Admin KYC Review</span>
-                      </Link>
+                      {user.roles && (user.roles.includes("ROLE_ADMIN") || user.roles.includes("ADMIN")) && (
+                        <Link
+                          to="/admin/kyc"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-amber-700 bg-amber-50/70 hover:bg-amber-100 transition"
+                        >
+                          <ShieldCheckIcon className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Admin KYC Review</span>
+                        </Link>
+                      )}
                     </div>
 
                     <div className="border-t border-slate-100 pt-1">

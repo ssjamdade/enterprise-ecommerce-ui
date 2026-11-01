@@ -5,8 +5,6 @@ import { useOrder } from "../hooks/useOrders";
 import {
   CheckIcon,
   TruckIcon,
-  ShieldCheckIcon,
-  ShoppingBagIcon,
   ArrowRightIcon,
 } from "../../../components/common/Icons";
 

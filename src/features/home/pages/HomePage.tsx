@@ -9,8 +9,6 @@ import {
   ArrowRightIcon,
   ShoppingBagIcon,
   ShieldCheckIcon,
-  TruckIcon,
-  RefreshCwIcon,
   SparklesIcon,
   CheckIcon,
 } from "../../../components/common/Icons";
