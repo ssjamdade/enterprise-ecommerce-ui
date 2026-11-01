@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../../../components/layout/Navbar";
 import Footer from "../../../components/layout/Footer";
 import {
@@ -6,17 +6,15 @@ import {
   getAdminSubmissionById,
   verifyAdminStep,
 } from "../api/sellerKycApi";
-import type { SellerKyc, KycStepStatus } from "../types/sellerKyc";
+import type { SellerKyc } from "../types/sellerKyc";
 import {
   CheckIcon,
   CloseIcon,
   AlertCircleIcon,
   FileTextIcon,
   CameraIcon,
-  BuildingIcon,
   CreditCardIcon,
   ShieldCheckIcon,
-  ArrowRightIcon,
 } from "../../../components/common/Icons";
 
 export default function AdminKycReviewPage() {

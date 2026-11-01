@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../../../components/layout/Navbar";
 import Footer from "../../../components/layout/Footer";
@@ -14,7 +14,6 @@ import {
   UploadIcon,
   CloseIcon,
   ArrowRightIcon,
-  AlertCircleIcon,
 } from "../../../components/common/Icons";
 
 export default function SellerProductsPage() {

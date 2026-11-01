@@ -12,7 +12,7 @@ import {
 
 export default function OrderHistoryPage() {
   const user = useAuthStore((state) => state.user);
-  const { data: orders = [], isLoading, isError } = useMyOrders();
+  const { data: orders = [], isLoading } = useMyOrders();
 
   if (!user) {
     return (

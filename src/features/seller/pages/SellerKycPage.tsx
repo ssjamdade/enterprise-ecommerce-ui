@@ -22,11 +22,13 @@ import {
   AlertCircleIcon,
   ArrowRightIcon,
   CloseIcon,
+  EditIcon,
 } from "../../../components/common/Icons";
 
 export default function SellerKycPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [kycData, setKycData] = useState<SellerKyc | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -98,11 +100,56 @@ export default function SellerKycPage() {
           ifscCode: data.ifscCode || "",
           bankProofDocumentUrl: data.bankProofDocumentUrl || "",
         });
+        setIsEditing(false);
+      } else {
+        setIsEditing(true);
       }
     } catch (err: any) {
       console.error("Error loading KYC:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    if (kycData) {
+      setForm({
+        companyName: kycData.companyName || "",
+        storeName: kycData.storeName || "",
+        idType: kycData.idType || "Aadhaar Card",
+        idNumber: kycData.idNumber || "",
+        idDocumentUrl: kycData.idDocumentUrl || "",
+        gstin: kycData.gstin || "",
+        panNumber: kycData.panNumber || "",
+        businessDocumentUrl: kycData.businessDocumentUrl || "",
+        selfieImageUrl: kycData.selfieImageUrl || "",
+        addressLine: kycData.addressLine || "",
+        city: kycData.city || "",
+        state: kycData.state || "",
+        pincode: kycData.pincode || "",
+        country: kycData.country || "India",
+        addressProofDocumentUrl: kycData.addressProofDocumentUrl || "",
+        bankName: kycData.bankName || "",
+        accountHolderName: kycData.accountHolderName || "",
+        accountNumber: kycData.accountNumber || "",
+        ifscCode: kycData.ifscCode || "",
+        bankProofDocumentUrl: kycData.bankProofDocumentUrl || "",
+      });
+    }
+    setIsEditing(false);
+    setErrorMessage(null);
+  };
+
+  const formatDate = (isoString?: string) => {
+    if (!isoString) return "N/A";
+    try {
+      return new Date(isoString).toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return isoString;
     }
   };
 
@@ -160,7 +207,12 @@ export default function SellerKycPage() {
       setSubmitting(true);
       const res = await submitSellerKyc(form);
       setKycData(res);
-      setSuccessMessage("KYC application submitted successfully! Admin will review each verification step.");
+      setIsEditing(false);
+      setSuccessMessage(
+        kycData
+          ? "KYC application updated and resubmitted successfully! Admin will review your updated details."
+          : "KYC application submitted successfully! Admin will review each verification step."
+      );
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: any) {
       setErrorMessage(
@@ -212,7 +264,6 @@ export default function SellerKycPage() {
 
   const isApproved = kycData?.overallStatus === "APPROVED";
   const isActionRequired = kycData?.overallStatus === "ACTION_REQUIRED";
-  const isPendingReview = kycData?.overallStatus === "PENDING_REVIEW";
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between text-slate-800">
@@ -363,8 +414,464 @@ export default function SellerKycPage() {
           </div>
         )}
 
-        {/* Form Container */}
-        <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Top Action & Mode Toolbar (Shown when KYC has been submitted) */}
+        {kycData && (
+          <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
+            <div className="flex items-center gap-3.5">
+              <div
+                className={`flex h-11 w-11 items-center justify-center rounded-2xl ${
+                  isEditing ? "bg-amber-100 text-amber-700" : "bg-indigo-50 text-indigo-600"
+                }`}
+              >
+                {isEditing ? <EditIcon className="w-5 h-5" /> : <FileTextIcon className="w-5 h-5" />}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-bold text-slate-900">
+                    {isEditing ? "KYC Application Editor" : "Official KYC Verification Document"}
+                  </h3>
+                  <span
+                    className={`rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                      isEditing ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    {isEditing ? "Edit Mode" : "Read-Only"}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs text-slate-500">
+                  {isEditing
+                    ? "Update your business details or re-upload documents below, then click Resubmit."
+                    : `Application Reference #${kycData.id} • Submitted on ${formatDate(kycData.createdAt)}`}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              {!isEditing ? (
+                !isApproved && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsEditing(true);
+                      setSuccessMessage(null);
+                      setErrorMessage(null);
+                    }}
+                    className="inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition"
+                  >
+                    <EditIcon className="w-3.5 h-3.5" />
+                    <span>Edit KYC Application</span>
+                  </button>
+                )
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+                >
+                  <CloseIcon className="w-3.5 h-3.5" />
+                  <span>Cancel Editing</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* View Mode Switching: Uneditable Static Document vs Editable Form */}
+        {kycData && !isEditing ? (
+          /* ================= UNEDITABLE STATIC DOCUMENT VIEW ================= */
+          <div className="space-y-8">
+            {/* General Business Info (Read-Only) */}
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+              <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 font-black">
+                  <BuildingIcon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Business & Store Profile</h3>
+                  <p className="text-xs text-slate-500">Your public store identity and registered legal entity</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Legal Company Name
+                  </span>
+                  <p className="text-sm font-semibold text-slate-900">{kycData.companyName}</p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Store Display Name
+                  </span>
+                  <p className="text-sm font-semibold text-slate-900">{kycData.storeName}</p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Registered Email
+                  </span>
+                  <p className="text-sm font-semibold text-slate-900 truncate">{kycData.userEmail}</p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Contact Phone
+                  </span>
+                  <p className="text-sm font-semibold text-slate-900">{kycData.userPhone || "Not provided"}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 1: Document Upload & Business Data Matching (Read-Only) */}
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 font-black text-sm">
+                    1
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">
+                      Step 1: Document Upload & Business Data Matching
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Government Photo ID, Permanent Account Number (PAN), and GSTIN
+                    </p>
+                  </div>
+                </div>
+                {renderStatusBadge(kycData.step1Status)}
+              </div>
+
+              {kycData.step1Status === "REJECTED" && (
+                <div className="mb-6 rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs text-rose-800">
+                  <span className="font-bold">Admin Feedback: </span>
+                  {kycData.step1RejectionReason || "Details did not match provided government documents."}
+                  <div className="mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className="font-bold text-rose-700 underline underline-offset-2 hover:text-rose-900"
+                    >
+                      Click here to edit and re-upload Step 1 documents →
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Government ID Type
+                  </span>
+                  <p className="text-sm font-semibold text-slate-900">{kycData.idType}</p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Government ID Number
+                  </span>
+                  <p className="text-sm font-mono font-semibold text-slate-900">{kycData.idNumber}</p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    PAN Number
+                  </span>
+                  <p className="text-sm font-mono font-semibold text-slate-900">{kycData.panNumber}</p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    GSTIN
+                  </span>
+                  <p className="text-sm font-mono font-semibold text-slate-900">{kycData.gstin}</p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-slate-100 pt-4">
+                {kycData.idDocumentUrl && (
+                  <a
+                    href={kycData.idDocumentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50/70 px-4 py-2.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-2xs"
+                  >
+                    <FileTextIcon className="w-4 h-4 text-indigo-600" />
+                    <span>View Uploaded Government ID Document</span>
+                  </a>
+                )}
+
+                {kycData.businessDocumentUrl && (
+                  <a
+                    href={kycData.businessDocumentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-100 transition shadow-2xs"
+                  >
+                    <FileTextIcon className="w-4 h-4 text-slate-500" />
+                    <span>View Business Registration / GST Certificate</span>
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Step 2: Facial Recognition / Biometric Selfie Check (Read-Only) */}
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-50 text-purple-600 font-black text-sm">
+                    2
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">
+                      Step 2: Facial Recognition / Biometric Selfie Check
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      A clear, well-lit photo of your face looking straight into the camera
+                    </p>
+                  </div>
+                </div>
+                {renderStatusBadge(kycData.step2Status)}
+              </div>
+
+              {kycData.step2Status === "REJECTED" && (
+                <div className="mb-6 rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs text-rose-800">
+                  <span className="font-bold">Admin Feedback: </span>
+                  {kycData.step2RejectionReason || "Selfie was unclear or face did not match photo on government ID."}
+                  <div className="mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className="font-bold text-rose-700 underline underline-offset-2 hover:text-rose-900"
+                    >
+                      Click here to edit and re-upload selfie →
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+                <div className="relative h-44 w-44 rounded-3xl border border-slate-200 bg-slate-50 overflow-hidden shrink-0 shadow-sm">
+                  {kycData.selfieImageUrl ? (
+                    <img
+                      src={kycData.selfieImageUrl}
+                      alt="Applicant Biometric Selfie"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-full flex items-center justify-center text-xs text-slate-400">
+                      No selfie uploaded
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 border border-emerald-200/60">
+                    <CheckIcon className="w-3.5 h-3.5" />
+                    Biometric Photo Submitted
+                  </span>
+                  <p className="text-slate-600 max-w-md">
+                    This photo is compared against the portrait on your registered government ID by compliance reviewers during verification.
+                  </p>
+                  {kycData.selfieImageUrl && (
+                    <a
+                      href={kycData.selfieImageUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:underline pt-1"
+                    >
+                      <CameraIcon className="w-3.5 h-3.5" />
+                      <span>Inspect Full Resolution Selfie in New Tab</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Step 4: Physical Address & Location Verification (Read-Only) */}
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 font-black text-sm">
+                    4
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">
+                      Step 4: Physical Address & Location Verification
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Operating business address and official utility / bank address proof
+                    </p>
+                  </div>
+                </div>
+                {renderStatusBadge(kycData.step4Status)}
+              </div>
+
+              {kycData.step4Status === "REJECTED" && (
+                <div className="mb-6 rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs text-rose-800">
+                  <span className="font-bold">Admin Feedback: </span>
+                  {kycData.step4RejectionReason || "Address proof document not clear or does not match stated address."}
+                  <div className="mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className="font-bold text-rose-700 underline underline-offset-2 hover:text-rose-900"
+                    >
+                      Click here to edit and re-upload address details →
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs">
+                <div className="sm:col-span-2">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Business Street Address
+                  </span>
+                  <p className="text-sm font-semibold text-slate-900">{kycData.addressLine}</p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    City & State
+                  </span>
+                  <p className="text-sm font-semibold text-slate-900">{kycData.city}, {kycData.state}</p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    PIN Code & Country
+                  </span>
+                  <p className="text-sm font-semibold text-slate-900">{kycData.pincode} ({kycData.country})</p>
+                </div>
+              </div>
+
+              <div className="mt-6 border-t border-slate-100 pt-4">
+                {kycData.addressProofDocumentUrl && (
+                  <a
+                    href={kycData.addressProofDocumentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50/70 px-4 py-2.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-2xs"
+                  >
+                    <FileTextIcon className="w-4 h-4 text-indigo-600" />
+                    <span>View Address Proof Document</span>
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Step 5: Bank Account & Payout Validation (Read-Only) */}
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 font-black text-sm">
+                    5
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">
+                      Step 5: Bank Account & Payout Validation
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Direct disbursement account for seller proceeds and settlement
+                    </p>
+                  </div>
+                </div>
+                {renderStatusBadge(kycData.step5Status)}
+              </div>
+
+              {kycData.step5Status === "REJECTED" && (
+                <div className="mb-6 rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs text-rose-800">
+                  <span className="font-bold">Admin Feedback: </span>
+                  {kycData.step5RejectionReason || "Bank account holder name does not match registered company or ID."}
+                  <div className="mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(true)}
+                      className="font-bold text-rose-700 underline underline-offset-2 hover:text-rose-900"
+                    >
+                      Click here to edit and re-upload bank details →
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-xs">
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Bank Name
+                  </span>
+                  <p className="text-sm font-semibold text-slate-900">{kycData.bankName}</p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Account Holder Name
+                  </span>
+                  <p className="text-sm font-semibold text-slate-900">{kycData.accountHolderName}</p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    Bank Account Number
+                  </span>
+                  <p className="text-sm font-mono font-semibold text-slate-900">{kycData.accountNumber}</p>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                    IFSC Code
+                  </span>
+                  <p className="text-sm font-mono font-semibold text-slate-900">{kycData.ifscCode}</p>
+                </div>
+              </div>
+
+              <div className="mt-6 border-t border-slate-100 pt-4">
+                {kycData.bankProofDocumentUrl && (
+                  <a
+                    href={kycData.bankProofDocumentUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50/70 px-4 py-2.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-2xs"
+                  >
+                    <CreditCardIcon className="w-4 h-4 text-indigo-600" />
+                    <span>View Bank Proof Document / Cancelled Cheque</span>
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Bottom Edit Application Callout */}
+            {!isApproved && (
+              <div className="rounded-3xl border border-slate-200 bg-gradient-to-r from-slate-50 to-indigo-50/30 p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">
+                    Need to modify or re-upload documents?
+                  </h4>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Click the button to unlock the application form and make corrections to your submission.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEditing(true);
+                    setSuccessMessage(null);
+                    setErrorMessage(null);
+                    window.scrollTo({ top: 350, behavior: "smooth" });
+                  }}
+                  className="shrink-0 inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-6 py-3 text-xs font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-700 transition"
+                >
+                  <EditIcon className="w-4 h-4" />
+                  <span>Edit KYC Application</span>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* ================= EDITABLE FORM MODE ================= */
+          <form onSubmit={handleSubmit} className="space-y-8">
           {/* General Business Info */}
           <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
             <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
@@ -874,9 +1381,18 @@ export default function SellerKycPage() {
             </div>
           </div>
 
-          {/* Action Submission Button */}
+          {/* Action Submission Buttons */}
           {!isApproved && (
-            <div className="flex justify-end gap-4 pt-4">
+            <div className="flex items-center justify-end gap-3 pt-4">
+              {kycData && isEditing && (
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  className="rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition shadow-2xs"
+                >
+                  Cancel
+                </button>
+              )}
               <button
                 type="submit"
                 disabled={submitting}
@@ -897,6 +1413,7 @@ export default function SellerKycPage() {
             </div>
           )}
         </form>
+        )}
       </main>
 
       <Footer />
