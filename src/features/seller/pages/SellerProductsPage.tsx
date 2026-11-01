@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../../../components/layout/Navbar";
 import Footer from "../../../components/layout/Footer";
 import { getMyProducts, createProduct, uploadProductImages } from "../../products/api/productApi";
-import { getCategories } from "../../categories/api/categoryApi";
+import { getCategories, createCategory } from "../../categories/api/categoryApi";
 import { checkSellerStatus, getMyKyc } from "../api/sellerKycApi";
 import type { Product, CreateProductInput } from "../../products/types/product";
 import type { Category } from "../../categories/types/category";
@@ -14,6 +14,9 @@ import {
   UploadIcon,
   CloseIcon,
   ArrowRightIcon,
+  CheckIcon,
+  AlertCircleIcon,
+  SparklesIcon,
 } from "../../../components/common/Icons";
 
 export default function SellerProductsPage() {
@@ -37,6 +40,44 @@ export default function SellerProductsPage() {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [modalError, setModalError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+
+  // Quick Add Category State
+  const [showAddCategoryInline, setShowAddCategoryInline] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryDesc, setNewCategoryDesc] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
+  const [categoryCreateError, setCategoryCreateError] = useState<string | null>(null);
+  const [categoryCreatedSuccess, setCategoryCreatedSuccess] = useState<string | null>(null);
+
+  const handleQuickCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCategoryName.trim()) {
+      setCategoryCreateError("Category name is required.");
+      return;
+    }
+
+    try {
+      setCreatingCategory(true);
+      setCategoryCreateError(null);
+
+      const created = await createCategory({
+        name: newCategoryName.trim(),
+        description: newCategoryDesc.trim() || undefined,
+        active: true,
+      });
+
+      setCategories((prev) => [...prev, created]);
+      setProductForm((prev) => ({ ...prev, categoryId: created.id }));
+      setCategoryCreatedSuccess(`Category "${created.name}" created and selected!`);
+      setNewCategoryName("");
+      setNewCategoryDesc("");
+      setShowAddCategoryInline(false);
+    } catch (err: any) {
+      setCategoryCreateError(err.response?.data?.message || "Failed to create category.");
+    } finally {
+      setCreatingCategory(false);
+    }
+  };
 
   useEffect(() => {
     initSellerDashboard();
@@ -356,18 +397,122 @@ export default function SellerProductsPage() {
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Category *</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block font-semibold text-slate-700">Category *</label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAddCategoryInline(!showAddCategoryInline);
+                          setCategoryCreateError(null);
+                        }}
+                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                      >
+                        {showAddCategoryInline ? "Cancel" : "+ Add New Category"}
+                      </button>
+                    </div>
+
                     <select
-                      value={productForm.categoryId}
-                      onChange={(e) => setProductForm({ ...productForm, categoryId: Number(e.target.value) })}
-                      className="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                      value={productForm.categoryId || ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "__ADD_NEW__") {
+                          setShowAddCategoryInline(true);
+                          setCategoryCreateError(null);
+                        } else {
+                          setProductForm({ ...productForm, categoryId: Number(val) });
+                          setShowAddCategoryInline(false);
+                        }
+                      }}
+                      className="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none bg-white"
                     >
+                      <option value="" disabled>-- Select a Category --</option>
                       {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>
                           {cat.name}
                         </option>
                       ))}
+                      <option value="__ADD_NEW__" className="font-bold text-indigo-600 bg-indigo-50/80">
+                        ➕ + Add New Category (if not in list)
+                      </option>
                     </select>
+
+                    {/* Notification if category was created */}
+                    {categoryCreatedSuccess && (
+                      <p className="mt-1 text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                        <CheckIcon className="w-3.5 h-3.5" />
+                        <span>{categoryCreatedSuccess}</span>
+                      </p>
+                    )}
+
+                    {/* Inline Quick Add Category Form */}
+                    {showAddCategoryInline && (
+                      <div className="mt-3 p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/60 shadow-xs">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-bold text-indigo-900 flex items-center gap-1.5">
+                            <SparklesIcon className="w-3.5 h-3.5 text-indigo-600" />
+                            Create & Select New Category
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setShowAddCategoryInline(false)}
+                            className="text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                          >
+                            <CloseIcon className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        {categoryCreateError && (
+                          <div className="mb-2 p-2 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-1.5">
+                            <AlertCircleIcon className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                            <span>{categoryCreateError}</span>
+                          </div>
+                        )}
+
+                        <div className="space-y-2">
+                          <input
+                            type="text"
+                            placeholder="Category Name (e.g. Smart Watches)"
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none"
+                          />
+                          <input
+                            type="text"
+                            placeholder="Brief description (optional)"
+                            value={newCategoryDesc}
+                            onChange={(e) => setNewCategoryDesc(e.target.value)}
+                            className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none"
+                          />
+                          <div className="flex items-center justify-end gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => setShowAddCategoryInline(false)}
+                              className="px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-200/60 transition cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleQuickCreateCategory}
+                              disabled={creatingCategory || !newCategoryName.trim()}
+                              className="px-3 py-1 rounded-lg bg-indigo-600 text-white text-xs font-bold shadow-xs hover:bg-indigo-700 transition disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
+                            >
+                              {creatingCategory ? (
+                                <>
+                                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  <span>Creating...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <CheckIcon className="w-3 h-3" />
+                                  <span>Save & Select</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

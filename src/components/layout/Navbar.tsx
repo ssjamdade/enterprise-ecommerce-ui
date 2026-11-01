@@ -226,14 +226,24 @@ useEffect(() => {
                         <span>Seller Dashboard</span>
                       </Link>
                       {user.roles && (user.roles.includes("ROLE_ADMIN") || user.roles.includes("ADMIN")) && (
-                        <Link
-                          to="/admin/kyc"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-amber-700 bg-amber-50/70 hover:bg-amber-100 transition"
-                        >
-                          <ShieldCheckIcon className="w-3.5 h-3.5 text-amber-600" />
-                          <span>Admin KYC Review</span>
-                        </Link>
+                        <>
+                          <Link
+                            to="/admin/kyc"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-amber-700 bg-amber-50/70 hover:bg-amber-100 transition"
+                          >
+                            <ShieldCheckIcon className="w-3.5 h-3.5 text-amber-600" />
+                            <span>Admin KYC Review</span>
+                          </Link>
+                          <Link
+                            to="/admin/categories"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-indigo-700 bg-indigo-50/70 hover:bg-indigo-100 transition"
+                          >
+                            <SparklesIcon className="w-3.5 h-3.5 text-indigo-600" />
+                            <span>Manage Categories</span>
+                          </Link>
+                        </>
                       )}
                     </div>
 

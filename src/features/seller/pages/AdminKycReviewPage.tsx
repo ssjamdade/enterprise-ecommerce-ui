@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../../../components/layout/Navbar";
 import Footer from "../../../components/layout/Footer";
 import {
@@ -15,6 +16,7 @@ import {
   CameraIcon,
   CreditCardIcon,
   ShieldCheckIcon,
+  SparklesIcon,
 } from "../../../components/common/Icons";
 
 export default function AdminKycReviewPage() {
@@ -172,6 +174,24 @@ export default function AdminKycReviewPage() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-10 w-full flex-1">
+        {/* Navigation Tabs between Admin features */}
+        <div className="mb-6 flex items-center gap-2 border-b border-slate-200 pb-3">
+          <Link
+            to="/admin/kyc"
+            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm shadow-indigo-600/30"
+          >
+            <ShieldCheckIcon className="w-4 h-4 text-indigo-200" />
+            <span>Seller KYC Approvals</span>
+          </Link>
+          <Link
+            to="/admin/categories"
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200/60 transition"
+          >
+            <SparklesIcon className="w-4 h-4 text-slate-500" />
+            <span>Product Categories</span>
+          </Link>
+        </div>
+
         {/* Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

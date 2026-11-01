@@ -12,6 +12,7 @@ import OrderHistoryPage from "../features/orders/pages/OrderHistoryPage";
 import SellerKycPage from "../features/seller/pages/SellerKycPage";
 import SellerProductsPage from "../features/seller/pages/SellerProductsPage";
 import AdminKycReviewPage from "../features/seller/pages/AdminKycReviewPage";
+import AdminCategoriesPage from "../features/categories/pages/AdminCategoriesPage";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
 import { useSessionWatcher } from "../features/auth/hooks/useSessionWatcher";
@@ -85,6 +86,14 @@ export default function AppRoutes() {
           element={
             <AdminRoute>
               <AdminKycReviewPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/categories"
+          element={
+            <AdminRoute>
+              <AdminCategoriesPage />
             </AdminRoute>
           }
         />
