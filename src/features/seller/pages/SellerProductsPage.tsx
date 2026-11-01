@@ -36,6 +36,7 @@ export default function SellerProductsPage() {
     price: 0,
     quantity: 1,
     categoryId: 0,
+    active: true,
   });
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [modalError, setModalError] = useState<string | null>(null);
@@ -151,6 +152,7 @@ export default function SellerProductsPage() {
         price: 0,
         quantity: 1,
         categoryId: categories[0]?.id || 0,
+        active: true,
       });
 
       // Reload products
@@ -554,6 +556,29 @@ export default function SellerProductsPage() {
                     onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
                     className="w-full rounded-xl border border-slate-200 p-2.5 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none"
                   />
+                </div>
+
+                <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <input
+                    type="checkbox"
+                    id="productActive"
+                    checked={productForm.active ?? true}
+                    onChange={(e) =>
+                      setProductForm({ ...productForm, active: e.target.checked })
+                    }
+                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer mt-0.5"
+                  />
+                  <div>
+                    <label
+                      htmlFor="productActive"
+                      className="block text-xs font-bold text-slate-800 cursor-pointer select-none"
+                    >
+                      Active Listing (Visible to buyers immediately)
+                    </label>
+                    <p className="text-[11px] text-slate-400">
+                      Leave checked to display this product publicly in catalog. Uncheck to save as draft / hidden.
+                    </p>
+                  </div>
                 </div>
 
                 <div>

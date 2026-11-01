@@ -28,4 +28,5 @@ export interface CreateProductInput {
   price: number;
   quantity: number;
   categoryId: number;
+  active?: boolean;
 }
